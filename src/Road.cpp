@@ -209,6 +209,24 @@ Road::approximate_lane_border_linear(const Lane& lane, const double s_start, con
     return s_vals;
 }
 
+Road& Road::operator=(const Road& other) {
+    if (this != &other) {
+        // Copy primitive members
+        length = other.length;
+        id = other.id;
+        junction = other.junction;
+        name = other.name;
+
+        // Copy complex members
+        predecessor = other.predecessor;
+        successor = other.successor;
+        neighbors = other.neighbors;
+
+        // Add logic to copy other members as needed
+    }
+    return *this;
+}
+
 std::set<double> Road::approximate_lane_border_linear(const Lane& lane, const double eps, const bool outer) const
 {
     const double s_end = this->get_lanesection_end(lane.key.lanesection_s0);

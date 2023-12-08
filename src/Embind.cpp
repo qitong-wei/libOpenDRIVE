@@ -33,6 +33,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::register_vector<std::vector<Vec3D>>("vector<vector<Vec3D>>");
     emscripten::register_vector<Mesh3D>("vector<Mesh3D>");
     emscripten::register_vector<RoadMark>("vector<RoadMark>");
+    emscripten::register_vector<Road>("vector<Road>");
 
     /* maps */
     emscripten::register_map<std::size_t, std::string>("map<std::size_t, string>");
@@ -56,6 +57,18 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
         .function("get_road_id", &RoadsMesh::get_road_id)
         .function("get_idx_interval_road", &RoadsMesh::get_idx_interval_road)
         .property("road_start_indices", &RoadsMesh::road_start_indices);
+
+    emscripten::class_<XmlNode>("XmlNode");
+
+    emscripten::class_<Road, emscripten::base<XmlNode>>("Road")
+        .constructor<std::string, double, std::string, std::string>()
+        .property("id", &Road::id)
+        .property("predecessor", &Road::predecessor)
+        .property("successor", &Road::successor);
+
+    emscripten::class_<RoadLink, emscripten::base<XmlNode>>("RoadLink")
+        .constructor<>()
+        .property("id", &RoadLink::id);
 
     emscripten::class_<LanesMesh, emscripten::base<RoadsMesh>>("LanesMesh")
         .function("get_lanesec_s0", &LanesMesh::get_lanesec_s0)
@@ -91,6 +104,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
 
     emscripten::class_<OpenDriveMap>("OpenDriveMap")
         .constructor<std::string, OpenDriveMapConfig>()
+        .function("get_roads", &OpenDriveMap::get_roads)
+        .property("id_to_road", &OpenDriveMap::id_to_road)
         .property("xodr_file", &OpenDriveMap::xodr_file)
         .property("x_offs", &OpenDriveMap::x_offs)
         .property("y_offs", &OpenDriveMap::y_offs);

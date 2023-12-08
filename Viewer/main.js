@@ -13,6 +13,7 @@ var spotlight_info = document.getElementById('spotlight_info');
 var INTERSECTED_LANE_ID = 0xffffffff;
 var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
+const roadMap = {};
 
 const COLORS = {
     road : 1.0,
@@ -163,6 +164,11 @@ function reloadOdrMap()
 
 function loadOdrMap(clear_map = true, fit_view = true)
 {
+    console.log(OpenDriveMap.get_roads().get(0));
+    for(let i = 0; i < OpenDriveMap.get_roads().size(); i++){
+        const road = OpenDriveMap.get_roads().get(i);
+        roadMap[road.id] = road;
+    }
     const t0 = performance.now();
     if (clear_map) {
         road_network_mesh.userData.odr_road_network_mesh.delete();
@@ -410,6 +416,8 @@ function animate()
             spotlight_info.innerHTML = `
                     <table>
                         <tr><th>road id</th><th>${road_id}</th></tr>
+                        <tr><th>predec</th><th>${roadMap[road_id].predecessor.id}</th></tr>
+                        <tr><th>succ</th><th>${roadMap[road_id].successor.id}</th></tr>
                         <tr><th>section s0</th><th>${lanesec_s0.toFixed(2)}</th></tr>
                         <tr><th>lane</th><th>${lane_id}</th></tr>
                         <tr><th>s/t</th><th>[${st_pixel_buffer[0].toFixed(2)}, ${st_pixel_buffer[1].toFixed(2)}]</th>

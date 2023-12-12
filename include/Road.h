@@ -78,6 +78,7 @@ struct SpeedRecord : public XmlNode
 class Road : public XmlNode
 {
 public:
+    Road();
     Road(std::string id, double length, std::string junction, std::string name);
 
     std::vector<LaneSection> get_lanesections() const;

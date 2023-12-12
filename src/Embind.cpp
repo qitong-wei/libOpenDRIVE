@@ -6,6 +6,7 @@
     #include "OpenDriveMap.h"
     #include "RefLine.h"
     #include "Road.h"
+    #include "Junction.h"
     #include "RoadNetworkMesh.h"
     #include "Utils.hpp"
     #include "ViewerUtils.h"
@@ -17,6 +18,7 @@ namespace odr
 {
 EMSCRIPTEN_BINDINGS(OpenDriveMap)
 {
+
     /* arrays */
     emscripten::value_array<std::array<std::size_t, 2>>("array<std::size_t, 2>").element(emscripten::index<0>()).element(emscripten::index<1>());
     emscripten::value_array<Vec2D>("Vec2D").element(emscripten::index<0>()).element(emscripten::index<1>());
@@ -34,6 +36,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::register_vector<Mesh3D>("vector<Mesh3D>");
     emscripten::register_vector<RoadMark>("vector<RoadMark>");
     emscripten::register_vector<Road>("vector<Road>");
+    emscripten::register_vector<Junction>("vector<Junction>");
 
     /* maps */
     emscripten::register_map<std::size_t, std::string>("map<std::size_t, string>");
@@ -44,6 +47,25 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::register_map<std::string, std::shared_ptr<Road>>("map<string, shared_ptr<Road>>");
     emscripten::register_map<int, std::shared_ptr<Lane>>("map<int, shared_ptr<Lane>>");
     emscripten::register_map<double, std::shared_ptr<LaneSection>>("map<double, shared_ptr<LaneSection>>");
+    emscripten::register_map<std::string, JunctionConnection>("map<std::string, JunctionConnection>");
+    emscripten::register_map<std::string, Road>("map<std::string, Road>");
+    emscripten::register_map<std::string, Junction>("map<std::string, Junction>");
+    
+    /* enum */
+    emscripten::enum_<JunctionConnection::ContactPoint>("JunctionConnection::ContactPoint")
+        .value("ContactPoint_None", JunctionConnection::ContactPoint::ContactPoint_None)
+        .value("ContactPoint_Start", JunctionConnection::ContactPoint::ContactPoint_Start)
+        .value("ContactPoint_End", JunctionConnection::ContactPoint::ContactPoint_End);
+
+    emscripten::enum_<RoadLink::Type>("Type")
+        .value("Type_None", RoadLink::Type::Type_None)
+        .value("Type_Road", RoadLink::Type::Type_Road)
+        .value("Type_Junction", RoadLink::Type::Type_Junction);
+
+emscripten::enum_<RoadLink::ContactPoint>("RoadLink::ContactPoint")
+        .value("ContactPoint_None", RoadLink::ContactPoint::ContactPoint_None)
+        .value("ContactPoint_Start", RoadLink::ContactPoint::ContactPoint_Start)
+        .value("ContactPoint_End", RoadLink::ContactPoint::ContactPoint_End);
 
     /* classes */
     emscripten::class_<Mesh3D>("Mesh3D")
@@ -61,14 +83,39 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::class_<XmlNode>("XmlNode");
 
     emscripten::class_<Road, emscripten::base<XmlNode>>("Road")
+        .constructor<>()
         .constructor<std::string, double, std::string, std::string>()
         .property("id", &Road::id)
         .property("predecessor", &Road::predecessor)
         .property("successor", &Road::successor);
+    
+    emscripten::class_<Junction, emscripten::base<XmlNode>>("Junction")
+        .constructor<>()
+        .constructor<std::string, std::string>()
+        .property("id", &Junction::id)
+        .property("name", &Junction::name)
+        .property("id_to_connection", &Junction::id_to_connection);
 
     emscripten::class_<RoadLink, emscripten::base<XmlNode>>("RoadLink")
         .constructor<>()
-        .property("id", &RoadLink::id);
+        .constructor<std::string, RoadLink::Type, RoadLink::ContactPoint>()
+        .property("id", &RoadLink::id)
+        .property("type", &RoadLink::type)
+        .property("type", &RoadLink::contact_point);
+
+    emscripten::class_<JunctionLaneLink>("JunctionLaneLink")
+        .constructor<int, int>()
+        .property("from", &JunctionLaneLink::from)
+        .property("to", &JunctionLaneLink::to);
+
+    emscripten::class_<JunctionConnection>("JunctionConnection")
+        .constructor<>()
+        .constructor<std::string, std::string, std::string, JunctionConnection::ContactPoint>()
+        .property("id", &JunctionConnection::id)
+        .property("incoming_road", &JunctionConnection::incoming_road)
+        .property("connecting_road", &JunctionConnection::connecting_road)
+        .property("contact_point", &JunctionConnection::contact_point)
+        .property("lane_links", &JunctionConnection::lane_links);
 
     emscripten::class_<LanesMesh, emscripten::base<RoadsMesh>>("LanesMesh")
         .function("get_lanesec_s0", &LanesMesh::get_lanesec_s0)
@@ -105,8 +152,10 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::class_<OpenDriveMap>("OpenDriveMap")
         .constructor<std::string, OpenDriveMapConfig>()
         .function("get_roads", &OpenDriveMap::get_roads)
-        .property("id_to_road", &OpenDriveMap::id_to_road)
+        .function("get_junctions", &OpenDriveMap::get_junctions)
         .property("xodr_file", &OpenDriveMap::xodr_file)
+        .property("id_to_road", &OpenDriveMap::id_to_road)
+        .property("id_to_junction", &OpenDriveMap::id_to_junction)
         .property("x_offs", &OpenDriveMap::x_offs)
         .property("y_offs", &OpenDriveMap::y_offs);
 

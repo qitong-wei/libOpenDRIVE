@@ -13,6 +13,8 @@
 
 namespace odr
 {
+RefLine::RefLine(){}
+
 RefLine::RefLine(std::string road_id, double length) : road_id(road_id), length(length) {}
 
 RefLine::RefLine(const RefLine& other) : road_id(other.road_id), length(other.length), elevation_profile(other.elevation_profile)

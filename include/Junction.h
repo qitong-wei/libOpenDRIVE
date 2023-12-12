@@ -44,7 +44,7 @@ struct JunctionConnection
         ContactPoint_Start,
         ContactPoint_End
     };
-
+    JunctionConnection();
     JunctionConnection(std::string id, std::string incoming_road, std::string connecting_road, ContactPoint contact_point);
 
     std::string  id = "";
@@ -92,6 +92,7 @@ struct JunctionController
 class Junction : public XmlNode
 {
 public:
+    Junction();
     Junction(std::string name, std::string id);
 
     std::string name = "";

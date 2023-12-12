@@ -10,9 +10,14 @@ JunctionConnection::JunctionConnection(std::string id, std::string incoming_road
 {
 }
 
+JunctionConnection::JunctionConnection()
+{}
+
 JunctionPriority::JunctionPriority(std::string high, std::string low) : high(high), low(low) {}
 
 JunctionController::JunctionController(std::string id, std::string type, std::uint32_t sequence) : id(id), type(type), sequence(sequence) {}
+
+Junction::Junction(){}
 
 Junction::Junction(std::string name, std::string id) : name(name), id(id) {}
 

@@ -13,6 +13,7 @@ namespace odr
 
 struct RefLine
 {
+    RefLine();
     RefLine(std::string road_id, double length);
     RefLine(const RefLine& other);
 

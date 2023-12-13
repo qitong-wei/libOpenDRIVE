@@ -14,6 +14,7 @@ var INTERSECTED_LANE_ID = 0xffffffff;
 var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
 const roadMap = {};
+const juncMap = {};
 
 const COLORS = {
     road : 1.0,
@@ -164,11 +165,17 @@ function reloadOdrMap()
 
 function loadOdrMap(clear_map = true, fit_view = true)
 {
-    console.log(OpenDriveMap.get_roads().get(0));
+    //console.log(OpenDriveMap.get_junctions().get(0).id_to_connection.get("2"));
+
     for(let i = 0; i < OpenDriveMap.get_roads().size(); i++){
         const road = OpenDriveMap.get_roads().get(i);
         roadMap[road.id] = road;
     }
+    for(let i = 0; i < OpenDriveMap.get_junctions().size(); i++){
+        const junc = OpenDriveMap.get_junctions().get(i);
+        juncMap[junc.id] = junc;
+    }
+    //console.log(juncMap);
     const t0 = performance.now();
     if (clear_map) {
         road_network_mesh.userData.odr_road_network_mesh.delete();
@@ -412,12 +419,21 @@ function animate()
             const road_id = odr_lanes_mesh.get_road_id(INTERSECTED_LANE_ID);
             const lanesec_s0 = odr_lanes_mesh.get_lanesec_s0(INTERSECTED_LANE_ID);
             const lane_id = odr_lanes_mesh.get_lane_id(INTERSECTED_LANE_ID);
-            odr_lanes_mesh.delete();
+
+            if(roadMap[road_id].successor.type.value === 2){
+                const junc_id = roadMap[road_id].successor.id;
+                const size = juncMap[junc_id].id_to_connection.size();
+                for(let i = 0; i < size; i++){
+                    const prede_road_id = juncMap[junc_id].id_to_connection.get(i.toString()).connecting_road;
+                    console.log(prede_road_id);
+                }
+            }else if(roadMap[road_id].successor.type.value === 1){
+                console.log(roadMap[road_id].successor.id);
+            }
+            // console.log(pre);
             spotlight_info.innerHTML = `
                     <table>
                         <tr><th>road id</th><th>${road_id}</th></tr>
-                        <tr><th>predec</th><th>${roadMap[road_id].predecessor.id}</th></tr>
-                        <tr><th>succ</th><th>${roadMap[road_id].successor.id}</th></tr>
                         <tr><th>section s0</th><th>${lanesec_s0.toFixed(2)}</th></tr>
                         <tr><th>lane</th><th>${lane_id}</th></tr>
                         <tr><th>s/t</th><th>[${st_pixel_buffer[0].toFixed(2)}, ${st_pixel_buffer[1].toFixed(2)}]</th>

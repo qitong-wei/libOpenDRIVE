@@ -101,7 +101,7 @@ emscripten::enum_<RoadLink::ContactPoint>("RoadLink::ContactPoint")
         .constructor<std::string, RoadLink::Type, RoadLink::ContactPoint>()
         .property("id", &RoadLink::id)
         .property("type", &RoadLink::type)
-        .property("type", &RoadLink::contact_point);
+        .property("contact_point", &RoadLink::contact_point);
 
     emscripten::class_<JunctionLaneLink>("JunctionLaneLink")
         .constructor<int, int>()
